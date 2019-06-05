@@ -1,26 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import Menu from './common/Menu'
+import Home from './pages/Home'
+import Weather from './pages/Weather'
+import Search from './pages/Search'
+import './styles/sassRoute.scss'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+const MainLayout = ({ component: Component, ...rest }) => {
+  // console.log(...rest)
+  const renderFn = (props) => (
+    <div className="main-layout">
+      <Menu {...rest} {...props} />
+      <div className="main-layout--content">
+          <Component {...rest} {...props} />
+      </div>
     </div>
-  );
+  )
+  return (
+    <Route
+      {...rest}
+      render={renderFn}
+    />
+  )
 }
 
-export default App;
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <Switch>
+          <MainLayout exact path='/' component={Home} />
+          <MainLayout path='/search/:keyword' component={Search} />
+          <MainLayout path='/weather/:weoid' component={Weather} />
+          {/* <Route path='/search/:keyword' component={Search} />
+          <Route path='/weather/:weoid' component={Weather} /> */}
+        </Switch>
+      </Router>
+    )
+  }
+}
+
+export default App
