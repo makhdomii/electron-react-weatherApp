@@ -17,18 +17,18 @@ import API from '../../common/api';
 
 const borderColor = ['Maroon', 'Teal', 'Olive', 'Orange', 'Navy'];
 const weatherLocation = weather =>
-  Object.keys(weather).map((item, index) => {
+  weather.map((item, index) => {
     let borderStyle = {
       borderTop: `3px solid ${
         borderColor[Math.floor(Math.random() * borderColor.length)]
         }`
     };
-    let todayWeather = weather[item].consolidated_weather[0];
+    let todayWeather = item.consolidated_weather[0];
     return (
       <Col key={index} md={2}>
         <Link
           className="none-decoration"
-          to={`/weather/${weather[item].woeid}`}
+          to={`/weather/${item.woeid}`}
         >
           <div className="text-white text-center home--box" style={borderStyle}>
             {WeatherIcon(todayWeather.weather_state_abbr, 40)}
@@ -36,7 +36,7 @@ const weatherLocation = weather =>
               {Math.round(todayWeather.the_temp)}{' '}
               <img className="temp-icon" src={centigrade} alt="" />
             </p>
-            <p className="h4">{item}</p>
+            <p className="h4">{item.title}</p>
             <div>
               <span className="h4">
                 <img className="temp-icon" src={max} alt="" />
@@ -57,35 +57,31 @@ export default class home extends Component {
   constructor() {
     super();
     this.state = {
-      loading: true
+      loading: true,
+      response: []
     };
     this.dataFromServer = {};
-    this.apiProps = this.apiProps.bind(this);
   }
-  apiProps = (res, location) => {
-    this.dataFromServer[location] = res;
-    if (Object.keys(this.dataFromServer).length > 5)
-      this.setState({ loading: false });
-  };
   componentWillMount() {
-    API.post('44418')
-      .then(res => this.apiProps(res, 'London'))
-      .catch(err => console.log(err));
-    API.post('2344116')
-      .then(res => this.apiProps(res, 'Istanbul'))
-      .catch(err => console.log(err));
-    API.post('638242')
-      .then(res => this.apiProps(res, 'Berlin'))
-      .catch(err => console.log(err));
-    API.post('565346')
-      .then(res => this.apiProps(res, 'Helsinki'))
-      .catch(err => console.log(err));
-    API.post('560743')
-      .then(res => this.apiProps(res, 'Dublin'))
-      .catch(err => console.log(err));
-    API.post('9807')
-      .then(res => this.apiProps(res, 'Vancouver'))
-      .catch(err => console.log(err));
+    const london = API.post('44418')
+    const istanbul = API.post('2344116')
+    const berlin = API.post('638242')
+    const helsinki = API.post('565346')
+    const dublin = API.post('560743')
+    const vancouver = API.post('9807')
+    Promise.all([
+      london,
+      istanbul,
+      berlin,
+      helsinki,
+      dublin,
+      vancouver,
+    ]).then(res => {
+      this.setState({
+        response: res,
+        loading: false
+      })
+    })
   }
   search = () => {
     let inputValue = document
@@ -120,7 +116,7 @@ export default class home extends Component {
                 </InputGroup>
               </Col>
             </Row>
-            <Row>{weatherLocation(this.dataFromServer)}</Row>
+            <Row>{weatherLocation(this.state.response)}</Row>
           </Container>
         </div>
       );
